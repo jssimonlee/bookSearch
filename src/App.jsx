@@ -40,7 +40,6 @@ export default function App() {
       setLoading(true);
       setError(null);
       setBooks([]);
-      // Track active single search parameters
       activeRequestRef.current = { query, type, lang };
     }
 
@@ -50,30 +49,33 @@ export default function App() {
     setHasSearched(true);
 
     try {
-      const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+      const isLocalDev = window.location.hostname === 'localhost';
       const queryPrefix = type === 'title' ? 'intitle:' : 'inauthor:';
-      let url = `https://www.googleapis.com/books/v1/volumes?q=${queryPrefix}"${encodeURIComponent(query)}"&maxResults=40&startIndex=${currentStartIndex}`;
-      
-      if (lang) {
-        url += `&langRestrict=${lang}`;
-      }
+      let url = '';
 
-      if (apiKey) {
-        url += `&key=${apiKey}`;
+      if (isLocalDev) {
+        // Direct Google API call for local dev using local .env key
+        const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+        url = `https://www.googleapis.com/books/v1/volumes?q=${queryPrefix}"${encodeURIComponent(query)}"&maxResults=40&startIndex=${currentStartIndex}`;
+        if (lang) url += `&langRestrict=${lang}`;
+        if (apiKey) url += `&key=${apiKey}`;
+      } else {
+        // Secure Serverless Proxy API call for production Vercel
+        url = `/api/search?q=${queryPrefix}"${encodeURIComponent(query)}"&startIndex=${currentStartIndex}`;
+        if (lang) url += `&langRestrict=${lang}`;
       }
 
       const response = await fetch(url);
       
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('API Rate limit (429) exceeded. Please configure Google Books API Key in .env file.');
+          throw new Error('API Rate limit (429) exceeded. Please configure Google Books API Key.');
         }
         throw new Error(`Server error. (Status: ${response.status})`);
       }
 
       const data = await response.json();
       
-      // If the search criteria changed while fetching, ignore the stale response
       if (
         activeRequestRef.current.query !== query ||
         activeRequestRef.current.type !== type ||
@@ -92,7 +94,6 @@ export default function App() {
 
       setHasMore(newItems.length > 0);
     } catch (err) {
-      // Stale response error ignore check
       if (
         !isLoadMore &&
         (activeRequestRef.current.query !== query ||
@@ -104,14 +105,13 @@ export default function App() {
       setError(err.message || 'Connection failed.');
       if (!isLoadMore) setBooks([]);
     } finally {
-      // Stale response finally skip check
       if (
         !isLoadMore &&
         (activeRequestRef.current.query !== query ||
           activeRequestRef.current.type !== type ||
           activeRequestRef.current.lang !== lang)
       ) {
-        // do not turn off loading for the newer request that is still running
+        // Stale response bypass
       } else {
         setLoading(false);
         setLoadingMore(false);
