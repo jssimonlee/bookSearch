@@ -16,7 +16,11 @@ export default function BookDetailModal({ book, onClose }) {
   const hasRating = volumeInfo.averageRating !== undefined;
   const averageRating = volumeInfo.averageRating || 0;
   const ratingsCount = volumeInfo.ratingsCount || 0;
-  const infoLink = volumeInfo.infoLink;
+  // 100% 안전한 HTTPS 통신 및 고유 도서 ID 기반 Fallback URL 수동 빌드
+  let safeInfoLink = volumeInfo.infoLink || `https://books.google.com/books?id=${book.id}`;
+  if (safeInfoLink.startsWith('http://')) {
+    safeInfoLink = safeInfoLink.replace('http://', 'https://');
+  }
 
   const thumbnail = volumeInfo.imageLinks?.medium || 
                     volumeInfo.imageLinks?.large || 
@@ -73,9 +77,9 @@ export default function BookDetailModal({ book, onClose }) {
               </div>
             )}
             
-            {infoLink && (
+            {safeInfoLink && (
               <a 
-                href={infoLink} 
+                href={safeInfoLink} 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="info-link-button"
