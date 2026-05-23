@@ -1,0 +1,132 @@
+.book-list-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem 4rem 1rem;
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Skeleton Loading styles */
+.book-card-skeleton {
+  height: 390px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-cover {
+  width: 100%;
+  height: 220px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.skeleton-info {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.8rem;
+}
+
+.skeleton-line {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+}
+
+.skeleton-line.title {
+  width: 85%;
+  height: 1.2rem;
+}
+
+.skeleton-line.author {
+  width: 50%;
+  height: 0.85rem;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.skeleton-line.pill {
+  width: 45px;
+  height: 1.2rem;
+  border-radius: 4px;
+}
+
+.skeleton-line.rating {
+  width: 70px;
+  height: 1rem;
+}
+
+/* Empty State & Error UI styling */
+.state-message-container {
+  max-width: 500px;
+  margin: 4rem auto;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-icon, .error-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
+  animation: float 3s ease-in-out infinite;
+}
+
+.error-icon {
+  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.3));
+}
+
+.state-message-container h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.state-message-container p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Responsive Grid adjustment */
+@media (max-width: 576px) {
+  .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+  }
+  
+  .book-card-skeleton {
+    height: 350px;
+  }
+  
+  .skeleton-cover {
+    height: 180px;
+  }
+}
