@@ -5,12 +5,12 @@ import BookList from './components/BookList';
 import BookDetailModal from './components/BookDetailModal';
 
 const POPULAR_AUTHORS = [
-  { name: 'Han Kang', emoji: '🍁' },
-  { name: 'Stephen King', emoji: '🤡' },
-  { name: 'Bernard Werber', emoji: '🐜' },
-  { name: 'Keigo Higashino', emoji: '🕵️' },
-  { name: 'Haruki Murakami', emoji: '🐱' },
-  { name: 'J. K. Rowling', emoji: '⚡' }
+  { name: '한강', displayName: '한강', emoji: '🍁' },
+  { name: 'Stephen King', displayName: 'Stephen King', emoji: '🤡' },
+  { name: 'Bernard Werber', displayName: 'Bernard Werber', emoji: '🐜' },
+  { name: '東野 圭吾', displayName: '東野 圭吾 (히가시노 게이고)', emoji: '🕵️' },
+  { name: '村上 春樹', displayName: '村上 春樹 (무라카미 하루키)', emoji: '🐱' },
+  { name: 'J. K. Rowling', displayName: 'J. K. Rowling', emoji: '⚡' }
 ];
 
 export default function App() {
@@ -26,7 +26,6 @@ export default function App() {
   const [searchType, setSearchType] = useState('author');
   const [hasMore, setHasMore] = useState(false);
 
-  // Ref to track the active request parameters to prevent race conditions
   const activeRequestRef = useRef({ query: '', type: '', lang: '' });
 
   const fetchBooks = async (query, lang = '', type = 'author', isLoadMore = false) => {
@@ -49,18 +48,17 @@ export default function App() {
     setHasSearched(true);
 
     try {
-      const isLocalDev = window.location.hostname === 'localhost';
+      const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
       const queryPrefix = type === 'title' ? 'intitle:' : 'inauthor:';
       let url = '';
 
+      const isLocalDev = window.location.hostname === 'localhost';
+
       if (isLocalDev) {
-        // Direct Google API call for local dev using local .env key
-        const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
         url = `https://www.googleapis.com/books/v1/volumes?q=${queryPrefix}"${encodeURIComponent(query)}"&maxResults=40&startIndex=${currentStartIndex}`;
         if (lang) url += `&langRestrict=${lang}`;
         if (apiKey) url += `&key=${apiKey}`;
       } else {
-        // Secure Serverless Proxy API call for production Vercel
         url = `/api/search?q=${queryPrefix}"${encodeURIComponent(query)}"&startIndex=${currentStartIndex}`;
         if (lang) url += `&langRestrict=${lang}`;
       }
@@ -69,9 +67,9 @@ export default function App() {
       
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error('API Rate limit (429) exceeded. Please configure Google Books API Key.');
+          throw new Error('API 검색 요청 제한(429)에 도달했습니다. 구글 Books API Key가 누락되었거나 하루 할당량이 초과되었을 수 있습니다. .env 파일에 API Key가 올바르게 기입되었는지 점검해 주세요.');
         }
-        throw new Error(`Server error. (Status: ${response.status})`);
+        throw new Error(`도서 정보를 가져오는 중 서버 오류가 발생했습니다. (Status: ${response.status})`);
       }
 
       const data = await response.json();
@@ -102,7 +100,7 @@ export default function App() {
       ) {
         return;
       }
-      setError(err.message || 'Connection failed.');
+      setError(err.message || '네트워크 연결이 원활하지 않습니다.');
       if (!isLoadMore) setBooks([]);
     } finally {
       if (
@@ -174,6 +172,7 @@ export default function App() {
 
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header Section */}
       <header style={{ 
         padding: '4rem 1rem 2rem 1rem', 
         textAlign: 'center', 
@@ -181,14 +180,14 @@ export default function App() {
         margin: '0 auto',
         width: '100%'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', marginBottom: '1.2rem' }}>
           <span style={{ fontSize: '2.8rem', filter: 'drop-shadow(0 0 10px rgba(139, 92, 246, 0.4))' }}>📖</span>
           <h1 className="glow-text" style={{ 
             fontSize: '3rem', 
             fontWeight: '800', 
             letterSpacing: '-0.05em' 
           }}>
-            LuminaBook
+            글숲
           </h1>
         </div>
         <p style={{ 
@@ -196,10 +195,10 @@ export default function App() {
           fontSize: '1.1rem', 
           fontWeight: '500', 
           marginBottom: '2rem',
-          lineHeight: '1.6'
+          lineHeight: '1.7'
         }}>
-          Explore worldwide masterpieces using Google Books API.<br />
-          Optimized sorting by publish year, rating, and customer reviews count.
+          구글 Books API를 활용하여 전 세계 모든 작가와 도서를 실시간으로 검색해 보세요.<br />
+          출판년도, 평점 인기순, 리뷰 참여 순으로 최적화된 책 탐색을 제공합니다.
         </p>
         
         <SearchBar 
@@ -209,9 +208,9 @@ export default function App() {
           initialSearchType={searchType}
         />
 
-        <div style={{ marginTop: '1.5rem' }}>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-dimmed)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.05em' }}>
-            🔥 POPULAR AUTHORS SEARCH
+        <div style={{ marginTop: '1.8rem' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-dimmed)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '0.9rem', letterSpacing: '0.05em' }}>
+            🔥 실시간 추천 인기 작가 검색
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.6rem' }}>
             {POPULAR_AUTHORS.map((author) => (
@@ -222,20 +221,20 @@ export default function App() {
                   background: searchQuery === author.name ? 'var(--gradient-main)' : 'var(--glass-bg)',
                   border: `1px solid ${searchQuery === author.name ? 'transparent' : 'var(--glass-border)'}`,
                   color: searchQuery === author.name ? '#ffffff' : 'var(--text-muted)',
-                  padding: '0.5rem 1rem',
+                  padding: '0.5rem 1.1rem',
                   borderRadius: '30px',
                   fontSize: '0.85rem',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
+                  gap: '0.4rem',
                   boxShadow: searchQuery === author.name ? '0 4px 10px rgba(139, 92, 246, 0.25)' : 'none',
                   transition: 'var(--transition-smooth)'
                 }}
                 className={searchQuery !== author.name ? 'glass-panel' : ''}
               >
                 <span>{author.emoji}</span>
-                <span>{author.name}</span>
+                <span>{author.displayName}</span>
               </button>
             ))}
           </div>
@@ -258,6 +257,7 @@ export default function App() {
           onBookClick={setSelectedBook} 
         />
 
+        {/* Load More Button */}
         {hasMore && books.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem auto 4rem auto' }}>
             <button
@@ -291,10 +291,10 @@ export default function App() {
                     borderRadius: '50%',
                     animation: 'spin 0.8s linear infinite'
                   }}></span>
-                  <span>Loading More...</span>
+                  <span>도서 추가 로딩 중...</span>
                 </>
               ) : (
-                <span>📖 Load More Books (+)</span>
+                <span>📖 도서 더 불러오기 (+)</span>
               )}
             </button>
           </div>
@@ -309,7 +309,7 @@ export default function App() {
         marginTop: 'auto'
       }}>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-dimmed)', fontWeight: '500' }}>
-          &copy; {new Date().getFullYear()} LuminaBook. Created with Google Books API & React.
+          &copy; {new Date().getFullYear()} 글숲 (Geulsup). Created with Google Books API & React.
         </p>
       </footer>
 
