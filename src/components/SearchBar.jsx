@@ -25,18 +25,21 @@ export default function SearchBar({ onSearch, initialQuery = '', initialLanguage
 
   return (
     <form className="search-bar-container glass-panel" onSubmit={handleSubmit}>
-      <div className="search-type-controls">
-        <div className="select-wrapper type-select-wrapper">
-          <select 
-            value={searchType} 
-            onChange={(e) => setSearchType(e.target.value)}
-            className="search-type-select"
-          >
-            <option value="author">✍️ 작가명</option>
-            <option value="title">📖 책 제목</option>
-          </select>
-          <span className="select-arrow">▼</span>
-        </div>
+      <div className="search-type-segmented-control">
+        <button
+          type="button"
+          className={`segment-btn ${searchType === 'author' ? 'active' : ''}`}
+          onClick={() => setSearchType('author')}
+        >
+          ✍️ 작가명
+        </button>
+        <button
+          type="button"
+          className={`segment-btn ${searchType === 'title' ? 'active' : ''}`}
+          onClick={() => setSearchType('title')}
+        >
+          📖 책 제목
+        </button>
       </div>
 
       <div className="search-input-wrapper">
